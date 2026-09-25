@@ -1,0 +1,94 @@
+# An S3-compatible object store inside the kind cluster, for the clusters
+# that back up with barmanObjectStore.
+#
+# RustFS rather than MinIO: MinIO no longer publishes container images, and
+# RustFS speaks the same S3 API with the same two environment variables for
+# its credentials. It keeps its data in an emptyDir, which is the point --
+# this is a demo, and deleting the kind cluster deletes the backups with it.
+#
+# No bucket is created here: barman-cloud creates the one it is pointed at
+# the first time it checks the WAL archive.
+apiVersion: v1
+kind: Secret
+metadata:
+  name: backup-store-creds
+  namespace: cnpg-demo
+type: Opaque
+stringData:
+  ACCESS_KEY_ID: demo-access
+  ACCESS_SECRET_KEY: demo-secret-key
+---
+# The same store with credentials it does not know, so that one cluster's
+# backups fail the way a rotated key makes them fail in real life.
+apiVersion: v1
+kind: Secret
+metadata:
+  name: backup-store-wrong-creds
+  namespace: cnpg-demo
+type: Opaque
+stringData:
+  ACCESS_KEY_ID: not-a-key
+  ACCESS_SECRET_KEY: not-the-secret
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backup-store
+  namespace: cnpg-demo
+  labels:
+    app: backup-store
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: backup-store
+  template:
+    metadata:
+      labels:
+        app: backup-store
+    spec:
+      containers:
+        - name: rustfs
+          image: rustfs/rustfs:1.0.0
+          ports:
+            - containerPort: 9000
+              name: s3
+          env:
+            - name: RUSTFS_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: backup-store-creds
+                  key: ACCESS_KEY_ID
+            - name: RUSTFS_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: backup-store-creds
+                  key: ACCESS_SECRET_KEY
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 9000
+            periodSeconds: 5
+          volumeMounts:
+            - name: data
+              mountPath: /data
+            - name: logs
+              mountPath: /logs
+      volumes:
+        - name: data
+          emptyDir: {}
+        - name: logs
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backup-store
+  namespace: cnpg-demo
+spec:
+  selector:
+    app: backup-store
+  ports:
+    - name: s3
+      port: 9000
+      targetPort: 9000

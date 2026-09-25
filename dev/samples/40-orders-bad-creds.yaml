@@ -1,0 +1,28 @@
+# orders: backups that cannot work.
+#
+# The object store is right, the credentials are not -- the way a rotated
+# access key breaks backups in real life. WAL archiving fails from the first
+# segment (the ContinuousArchiving condition goes False), and the Backup in
+# 45-orders-backup.yaml fails with the object store's own error. The
+# database itself stays up: Postgres does not stop for a failing archive,
+# which is exactly why this goes unnoticed until someone needs a restore.
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: orders
+  namespace: cnpg-demo
+spec:
+  instances: 2
+  storage:
+    size: 1Gi
+  backup:
+    barmanObjectStore:
+      destinationPath: s3://orders-backups/
+      endpointURL: http://backup-store.cnpg-demo.svc:9000
+      s3Credentials:
+        accessKeyId:
+          name: backup-store-wrong-creds
+          key: ACCESS_KEY_ID
+        secretAccessKey:
+          name: backup-store-wrong-creds
+          key: ACCESS_SECRET_KEY

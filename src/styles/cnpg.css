@@ -1,0 +1,1414 @@
+/*
+ * CloudNativePG, drawn in the app's colours.
+ *
+ * Every colour here is one of the app's tokens -- var(--bg), var(--text),
+ * var(--accent), var(--ok), var(--warn), var(--error), var(--chart-1) ... --
+ * which the SDK writes onto :root before the page runs and rewrites when the
+ * user switches theme. The page names no colour of its own, so it follows
+ * the app into light or dark without a line of JavaScript, and a red dot
+ * means the same thing here as everywhere else in the app.
+ *
+ * The one thing drawn in the accent colour on purpose is the primary: it is
+ * the instance that takes the writes, and the eye should find it first on
+ * every card and every map. Problems are red and amber; everything else is
+ * the app's quiet greys.
+ */
+
+* {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background: var(--bg);
+    color: var(--text);
+    font: 13px/1.5 system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    padding: 16px 18px 24px;
+}
+
+body.panel {
+    padding: 10px 12px;
+}
+
+h1 {
+    font-size: 18px;
+    font-weight: 650;
+    margin: 0 0 2px;
+    letter-spacing: -0.01em;
+}
+
+h2 {
+    font-size: 12px;
+    font-weight: 600;
+    margin: 0 0 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-dim);
+}
+
+h3 {
+    font-size: 13px;
+    font-weight: 600;
+    margin: 0 0 6px;
+}
+
+p {
+    margin: 0 0 8px;
+}
+
+.note {
+    color: var(--text-dim);
+    margin: 0 0 10px;
+    max-width: 90ch;
+}
+
+.faint {
+    color: var(--text-faint);
+}
+
+.mono {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 11.5px;
+}
+
+.spacer {
+    flex: 1;
+}
+
+/* ----- the page's own heading ------------------------------------------- */
+
+.page-head {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    flex-wrap: wrap;
+    padding-bottom: 11px;
+    margin-bottom: 14px;
+    border-bottom: 1px solid var(--border);
+}
+
+.page-head .mark {
+    flex: none;
+}
+
+.page-title {
+    min-width: 0;
+}
+
+.page-head .note {
+    margin: 0;
+}
+
+/* ----- tiles ------------------------------------------------------------ */
+
+.stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 10px;
+    margin-bottom: 14px;
+}
+
+.stat {
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 14px;
+    min-width: 0;
+}
+
+.stat-value {
+    font-size: 22px;
+    font-weight: 620;
+    line-height: 1.15;
+    font-variant-numeric: tabular-nums;
+}
+
+.stat-label {
+    color: var(--text-dim);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-top: 3px;
+}
+
+.stat-note {
+    color: var(--text-faint);
+    font-size: 11.5px;
+    margin-top: 1px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* ----- blocks ----------------------------------------------------------- */
+
+.block {
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 13px 15px;
+    margin-bottom: 12px;
+}
+
+/* ----- cluster cards ------------------------------------------------------ */
+
+.cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
+    gap: 12px;
+    margin-bottom: 14px;
+}
+
+.card {
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 0;
+}
+
+.card-top {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+}
+
+.card-glyph {
+    flex: none;
+    width: 112px;
+    height: 66px;
+    border-radius: 8px;
+    background: var(--bg-raised);
+    display: grid;
+    place-items: center;
+}
+
+.card-glyph:hover {
+    background: var(--bg-hover);
+}
+
+.card-id {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.card-title {
+    display: flex;
+    align-items: baseline;
+    gap: 7px;
+    min-width: 0;
+}
+
+.card-name,
+.summary-name,
+.link-name {
+    background: none;
+    border: none;
+    padding: 0;
+    font: inherit;
+    font-weight: 650;
+    color: var(--text);
+    cursor: pointer;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    min-width: 0;
+    text-align: left;
+}
+
+.card-name {
+    font-size: 15px;
+}
+
+.summary-name {
+    font-size: 16px;
+}
+
+.link-name {
+    font-weight: 600;
+}
+
+.card-name:hover,
+.summary-name:hover,
+.link-name:hover {
+    color: var(--accent);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+.card-ns {
+    color: var(--text-faint);
+    font-size: 12px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.card-state {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    font-size: 12px;
+}
+
+.card-sentence {
+    color: var(--text-dim);
+    margin: 0;
+    font-size: 12.5px;
+    min-height: 2.9em;
+}
+
+.card-facts {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    gap: 3px 14px;
+    margin: 0;
+    padding-top: 8px;
+    border-top: 1px solid var(--border-soft);
+    font-size: 12.5px;
+}
+
+.card-facts dt {
+    color: var(--text-dim);
+}
+
+.card-facts dd {
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.card-foot {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    font-size: 12px;
+    padding-top: 2px;
+}
+
+.foot-link {
+    background: none;
+    border: none;
+    padding: 0;
+    font: inherit;
+    color: var(--accent);
+    cursor: pointer;
+}
+
+.foot-link:hover {
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+.mini-bar {
+    display: inline-block;
+    width: 56px;
+    height: 6px;
+    border-radius: 3px;
+    background: var(--bg-raised);
+    overflow: hidden;
+    flex: none;
+}
+
+.mini-fill {
+    display: block;
+    height: 100%;
+    border-radius: 3px;
+}
+
+.fill-ok {
+    background: var(--ok);
+}
+.fill-warn {
+    background: var(--warn);
+}
+.fill-error {
+    background: var(--error);
+}
+.fill-info {
+    background: var(--accent);
+}
+.fill-none {
+    background: var(--text-faint);
+}
+
+/* ----- the glyph and the map ---------------------------------------------- */
+
+/*
+ * One vocabulary for both drawings: the primary is a filled accent circle; a
+ * standby is a ring in its tone; the link is solid for a synchronous
+ * candidate and dashed for async; red is "not streaming". A hibernated
+ * cluster keeps its shape, hollow and faint.
+ */
+
+.glyph {
+    width: 112px;
+    height: 66px;
+    display: block;
+}
+
+.node {
+    stroke-width: 2.5;
+    fill: var(--bg-panel);
+    stroke: var(--text-faint);
+}
+
+.node-primary {
+    fill: var(--accent);
+    stroke: var(--accent);
+}
+
+.node-primary.tone-error {
+    fill: var(--error);
+    stroke: var(--error);
+}
+
+.node-replica.tone-ok {
+    stroke: var(--ok);
+    fill: color-mix(in srgb, var(--ok) 16%, var(--bg-panel));
+}
+
+.node-replica.tone-warn {
+    stroke: var(--warn);
+    fill: color-mix(in srgb, var(--warn) 18%, var(--bg-panel));
+}
+
+.node-replica.tone-error {
+    stroke: var(--error);
+    fill: color-mix(in srgb, var(--error) 22%, var(--bg-panel));
+}
+
+.node-promoting {
+    stroke: var(--accent);
+    stroke-dasharray: 4 3;
+}
+
+.node-asleep,
+.node-ghost,
+.node-missing {
+    fill: none;
+    stroke: var(--text-faint);
+    stroke-dasharray: 3 3;
+    stroke-width: 1.8;
+}
+
+.node-ghost {
+    opacity: 0.55;
+}
+
+.node-halo {
+    fill: none;
+    stroke: var(--accent);
+    stroke-width: 2;
+    stroke-dasharray: 3 4;
+    opacity: 0.8;
+}
+
+.edge {
+    stroke: var(--text-faint);
+    stroke-width: 2;
+    fill: none;
+    stroke-linecap: round;
+}
+
+.edge-sync {
+    stroke-width: 2.5;
+}
+
+.edge-async {
+    stroke-dasharray: 5 4;
+}
+
+.edge.tone-ok {
+    stroke: var(--ok);
+}
+
+.edge.tone-warn {
+    stroke: var(--warn);
+}
+
+.edge-broken {
+    stroke: var(--error);
+    stroke-dasharray: 2 5;
+}
+
+.edge-asleep,
+.edge-ghost {
+    stroke: var(--text-faint);
+    stroke-dasharray: 3 4;
+    opacity: 0.6;
+}
+
+.glyph-more,
+.glyph-zz {
+    fill: var(--text-faint);
+    font-size: 10px;
+    font-weight: 600;
+}
+
+.glyph-zz {
+    font-style: italic;
+    letter-spacing: 0.1em;
+}
+
+.map-holder {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.map {
+    width: 100%;
+    min-width: 640px;
+    height: auto;
+    display: block;
+}
+
+.map .map-edge {
+    stroke-width: 3;
+}
+
+.map .edge-sync.map-edge {
+    stroke-width: 3.5;
+}
+
+.entry-edge {
+    fill: none;
+    stroke: var(--border);
+    stroke-width: 1.6;
+}
+
+.entry-edge.entry-pooler {
+    stroke: color-mix(in srgb, var(--accent) 55%, var(--border));
+    stroke-width: 2;
+}
+
+.entry-rect {
+    fill: var(--bg-raised);
+    stroke: var(--border);
+    stroke-width: 1;
+}
+
+.entry:hover .entry-rect,
+.instance:hover .node {
+    filter: brightness(1.08);
+}
+
+.entry:hover .entry-rect {
+    stroke: var(--accent);
+}
+
+.entry-edge-mark {
+    fill: var(--text-faint);
+}
+
+.entry-box-pooler .entry-edge-mark {
+    fill: var(--accent);
+}
+
+.entry.tone-warn .entry-edge-mark {
+    fill: var(--warn);
+}
+
+.entry.tone-error .entry-edge-mark {
+    fill: var(--error);
+}
+
+.entry.tone-error .entry-rect {
+    stroke: var(--error);
+}
+
+.entry-name {
+    fill: var(--text);
+    font-size: 12.5px;
+    font-weight: 600;
+}
+
+.entry-detail {
+    fill: var(--text-dim);
+    font-size: 11px;
+}
+
+.node-role {
+    fill: var(--text-dim);
+    font-size: 9.5px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+}
+
+.node-role-primary {
+    fill: var(--accent-text);
+    font-size: 10.5px;
+}
+
+.node-name {
+    fill: var(--text);
+    font-size: 13px;
+    font-weight: 650;
+}
+
+.node-detail {
+    fill: var(--text-dim);
+    font-size: 11px;
+}
+
+.node-trouble {
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.edge-label {
+    fill: var(--text-dim);
+    font-size: 11px;
+    font-weight: 600;
+    paint-order: stroke;
+    stroke: var(--bg-panel);
+    stroke-width: 5px;
+    stroke-linejoin: round;
+}
+
+text.tone-ok {
+    fill: var(--ok);
+}
+text.tone-warn {
+    fill: var(--warn);
+}
+text.tone-error {
+    fill: var(--error);
+}
+
+.map-empty {
+    fill: var(--text-faint);
+    font-size: 14px;
+}
+
+.map-asleep .node-role-primary {
+    fill: var(--text-faint);
+}
+
+.map-legend {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 18px;
+    margin: 8px 0 0;
+    padding: 0;
+    font-size: 11.5px;
+    color: var(--text-dim);
+}
+
+.map-legend li {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.key {
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+    border: 2px solid var(--text-faint);
+    display: inline-block;
+}
+
+.key-primary {
+    background: var(--accent);
+    border-color: var(--accent);
+}
+
+.key-replica,
+.key-completed {
+    border-color: var(--ok);
+    background: color-mix(in srgb, var(--ok) 16%, transparent);
+}
+
+.key-completed {
+    background: var(--ok);
+}
+
+.key-broken,
+.key-failed {
+    border-color: var(--error);
+    background: color-mix(in srgb, var(--error) 22%, transparent);
+}
+
+.key-failed {
+    background: var(--error);
+}
+
+.key-running {
+    border-color: var(--accent);
+    background: transparent;
+}
+
+.key-line {
+    width: 22px;
+    height: 0;
+    border-top: 3px solid var(--ok);
+    display: inline-block;
+}
+
+.key-async {
+    border-top-style: dashed;
+    border-top-width: 2px;
+}
+
+.key-band {
+    width: 22px;
+    height: 7px;
+    border-radius: 4px;
+    background: color-mix(in srgb, var(--ok) 55%, transparent);
+    display: inline-block;
+}
+
+.key-diamond {
+    width: 9px;
+    height: 9px;
+    background: var(--accent);
+    transform: rotate(45deg);
+    display: inline-block;
+    margin: 0 2px;
+}
+
+/* ----- the summary strip over a cluster ------------------------------------- */
+
+.summary,
+.backup-head {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+}
+
+.summary {
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 15px;
+}
+
+.summary-main {
+    flex: 1 1 360px;
+    min-width: 0;
+}
+
+.summary-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 4px;
+}
+
+.summary-sentence,
+.summary-sync {
+    margin: 0;
+    color: var(--text-dim);
+}
+
+.action-row {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+}
+
+.actions {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
+.notice {
+    margin: 0;
+    font-size: 12px;
+    max-width: 42ch;
+    text-align: right;
+}
+
+.notice:empty {
+    display: none;
+}
+
+.notice-ok {
+    color: var(--ok);
+}
+
+.notice-error {
+    color: var(--error);
+}
+
+/* ----- backups -------------------------------------------------------------- */
+
+.backup-section {
+    padding-bottom: 12px;
+}
+
+.backup-head {
+    margin-bottom: 8px;
+}
+
+.backup-facts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 18px;
+    margin: 2px 0 0;
+    color: var(--text-dim);
+}
+
+.backup-facts strong {
+    font-weight: 650;
+}
+
+.schedules {
+    list-style: none;
+    margin: 0 0 6px;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.schedule {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    flex-wrap: wrap;
+    padding: 3px 6px;
+    border-radius: 6px;
+    font-size: 12.5px;
+}
+
+.schedule.pick:hover {
+    background: var(--bg-hover);
+}
+
+.schedule-name {
+    font-weight: 600;
+}
+
+.timeline-holder {
+    width: 100%;
+    overflow-x: auto;
+    margin-top: 4px;
+}
+
+.timeline {
+    width: 100%;
+    min-width: 560px;
+    height: auto;
+    display: block;
+}
+
+.tick {
+    stroke: var(--chart-grid, var(--border-soft));
+    stroke-width: 1;
+}
+
+.tick-label,
+.now-label {
+    fill: var(--text-faint);
+    font-size: 10.5px;
+}
+
+.now-label {
+    fill: var(--text-dim);
+    font-weight: 600;
+}
+
+.now {
+    stroke: var(--text-dim);
+    stroke-width: 1.5;
+    stroke-dasharray: 3 3;
+}
+
+.band-track {
+    fill: var(--bg-raised);
+}
+
+.band {
+    fill: color-mix(in srgb, var(--ok) 55%, transparent);
+}
+
+.band-gap {
+    fill: color-mix(in srgb, var(--error) 60%, transparent);
+}
+
+.band-more {
+    fill: var(--text-dim);
+    font-size: 10.5px;
+    font-weight: 600;
+}
+
+.track {
+    stroke: var(--border);
+    stroke-width: 1.5;
+}
+
+.dotmark {
+    stroke: var(--bg-panel);
+    stroke-width: 2;
+    cursor: pointer;
+}
+
+.dot-completed {
+    fill: var(--ok);
+}
+
+.dot-failed {
+    fill: var(--error);
+}
+
+.dot-running,
+.dot-pending {
+    fill: var(--bg-panel);
+    stroke: var(--accent);
+    stroke-width: 2.5;
+}
+
+.dot-unknown {
+    fill: var(--warn);
+}
+
+.next-run {
+    fill: var(--accent);
+}
+
+.failures {
+    border: 1px solid color-mix(in srgb, var(--error) 50%, var(--border));
+    background: color-mix(in srgb, var(--error) 7%, var(--bg-panel));
+    border-radius: 8px;
+    padding: 9px 12px;
+    margin: 10px 0;
+}
+
+.failures h3 {
+    color: var(--error);
+}
+
+.failure-row {
+    padding: 4px 6px;
+    border-radius: 6px;
+}
+
+.failure-row:hover {
+    background: var(--bg-hover);
+}
+
+.failure-text {
+    margin: 3px 0 0;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 11.5px;
+    color: var(--text);
+}
+
+.unprotected {
+    color: var(--warn);
+    font-weight: 500;
+}
+
+/* ----- charts ----------------------------------------------------------------- */
+
+.chart-tiles {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 10px;
+}
+
+.chart-tile {
+    background: var(--bg-raised);
+    border-radius: 8px;
+    padding: 9px 11px;
+    min-width: 0;
+}
+
+.chart-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.chart-label {
+    color: var(--text-dim);
+    font-size: 11.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.chart-value {
+    font-size: 16px;
+    font-weight: 650;
+    font-variant-numeric: tabular-nums;
+}
+
+.spark {
+    width: 100%;
+    height: 40px;
+    display: block;
+    margin: 4px 0;
+}
+
+.spark-base {
+    stroke: var(--chart-grid, var(--border-soft));
+}
+
+.spark-line {
+    stroke-width: 1.6;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+}
+
+.series-1 {
+    stroke: var(--chart-1);
+    background: var(--chart-1);
+}
+.series-2 {
+    stroke: var(--chart-2);
+    background: var(--chart-2);
+}
+.series-3 {
+    stroke: var(--chart-3);
+    background: var(--chart-3);
+}
+.series-4 {
+    stroke: var(--chart-4);
+    background: var(--chart-4);
+}
+.series-5 {
+    stroke: var(--chart-5);
+    background: var(--chart-5);
+}
+.series-6 {
+    stroke: var(--chart-6);
+    background: var(--chart-6);
+}
+.series-7 {
+    stroke: var(--chart-7);
+    background: var(--chart-7);
+}
+.series-8 {
+    stroke: var(--chart-8);
+    background: var(--chart-8);
+}
+
+.chart-legend {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    font-size: 11.5px;
+}
+
+.chart-legend li {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.swatch {
+    width: 8px;
+    height: 3px;
+    border-radius: 2px;
+    flex: none;
+}
+
+.legend-name {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: var(--text-dim);
+}
+
+.legend-value {
+    font-variant-numeric: tabular-nums;
+}
+
+.chart-empty,
+.chart-more {
+    color: var(--text-faint);
+    font-size: 11.5px;
+    margin: 6px 0 0;
+}
+
+/* ----- the attention list --------------------------------------------------- */
+
+.issues {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.issue {
+    display: flex;
+    align-items: baseline;
+    gap: 9px;
+    padding: 5px 6px;
+    border-radius: 6px;
+    border-bottom: 1px solid var(--border-soft);
+}
+
+.issue:last-child {
+    border-bottom: none;
+}
+
+.issue:hover,
+.issue:focus-visible {
+    background: var(--bg-hover);
+    outline: none;
+}
+
+.issue .dot {
+    transform: translateY(-1px);
+}
+
+.issue-title {
+    font-weight: 600;
+    flex: none;
+    max-width: 42%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.issue-detail {
+    color: var(--text-dim);
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* ----- controls -------------------------------------------------------------- */
+
+button,
+select {
+    font: inherit;
+    color: var(--text);
+    background: var(--bg-raised);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 4px 10px;
+    cursor: pointer;
+}
+
+/*
+ * The values in a dropdown: a select's options are drawn by the platform in a
+ * window of its own that inherits the select's colour but not its
+ * background, which leaves a dark theme painting light text on a light popup.
+ * Both are set, so the popup cannot disagree with the control.
+ */
+select option {
+    background-color: var(--bg-raised);
+    color: var(--text);
+}
+
+select option:checked {
+    background-color: var(--accent);
+    color: var(--accent-text);
+}
+
+button:hover,
+select:hover {
+    background: var(--bg-hover);
+}
+
+button:disabled {
+    opacity: 0.5;
+    cursor: default;
+}
+
+button.primary {
+    background: var(--accent);
+    color: var(--accent-text);
+    border-color: transparent;
+}
+
+button.primary:hover:not(:disabled) {
+    filter: brightness(1.08);
+}
+
+.picker {
+    max-width: 280px;
+}
+
+/* ----- pills and dots -------------------------------------------------------- */
+
+.dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex: none;
+    display: inline-block;
+    background: var(--text-faint);
+}
+
+.dot-ok {
+    background: var(--ok);
+}
+.dot-warn {
+    background: var(--warn);
+}
+.dot-error {
+    background: var(--error);
+}
+.dot-info {
+    background: var(--accent);
+}
+.dot-none {
+    background: var(--text-faint);
+}
+
+.pill {
+    display: inline-block;
+    padding: 0 8px;
+    border-radius: 999px;
+    font-size: 11px;
+    line-height: 18px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    background: var(--bg-raised);
+    white-space: nowrap;
+}
+
+.pill-ok {
+    color: var(--ok);
+    border-color: color-mix(in srgb, var(--ok) 45%, transparent);
+    background: color-mix(in srgb, var(--ok) 12%, transparent);
+}
+
+.pill-warn {
+    color: var(--warn);
+    border-color: color-mix(in srgb, var(--warn) 45%, transparent);
+    background: color-mix(in srgb, var(--warn) 12%, transparent);
+}
+
+.pill-error {
+    color: var(--error);
+    border-color: color-mix(in srgb, var(--error) 45%, transparent);
+    background: color-mix(in srgb, var(--error) 12%, transparent);
+}
+
+.pill-info {
+    color: var(--accent);
+    border-color: color-mix(in srgb, var(--accent) 45%, transparent);
+    background: color-mix(in srgb, var(--accent) 12%, transparent);
+}
+
+.tone-ok {
+    color: var(--ok);
+}
+.tone-warn {
+    color: var(--warn);
+}
+.tone-error {
+    color: var(--error);
+}
+.tone-info {
+    color: var(--accent);
+}
+
+.chip {
+    display: inline-block;
+    margin-right: 4px;
+    padding: 0 6px;
+    border-radius: 5px;
+    background: var(--bg-raised);
+    border: 1px solid var(--border-soft);
+    font-size: 11.5px;
+    white-space: nowrap;
+}
+
+.chip:hover {
+    border-color: var(--accent);
+}
+
+/* ----- tables ----------------------------------------------------------------- */
+
+.table-wrap {
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th,
+td {
+    text-align: left;
+    padding: 5px 12px 5px 0;
+    border-bottom: 1px solid var(--border-soft);
+    white-space: nowrap;
+}
+
+td.num,
+th.num {
+    font-variant-numeric: tabular-nums;
+}
+
+th {
+    color: var(--text-dim);
+    font-weight: 500;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+tbody tr:last-child td {
+    border-bottom: none;
+}
+
+tr.clickable {
+    cursor: pointer;
+}
+
+tr.clickable:hover td {
+    background: var(--bg-hover);
+}
+
+dl.facts {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    gap: 3px 16px;
+    margin: 6px 0 0;
+}
+
+dl.facts dt {
+    color: var(--text-dim);
+}
+
+dl.facts dd {
+    margin: 0;
+    overflow-wrap: anywhere;
+}
+
+/* ----- panels ------------------------------------------------------------------- */
+
+.panel-top {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 4px;
+}
+
+.panel-glyph {
+    flex: none;
+    border-radius: 8px;
+    background: var(--bg-raised);
+}
+
+.panel-main {
+    min-width: 0;
+}
+
+.panel-head {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    flex-wrap: wrap;
+    margin-bottom: 4px;
+}
+
+.panel-sentence {
+    color: var(--text-dim);
+    margin: 0;
+}
+
+.panel-actions {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    flex-direction: row-reverse;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 10px;
+}
+
+.panel-actions .action-row {
+    align-items: flex-end;
+}
+
+/* ----- odds and ends ------------------------------------------------------------- */
+
+.empty,
+.loading {
+    color: var(--text-dim);
+    padding: 14px 0;
+    margin: 0;
+}
+
+.failure {
+    border: 1px solid var(--error);
+    border-radius: 8px;
+    padding: 10px 12px;
+    background: var(--bg-panel);
+}
+
+.refresh-failure {
+    color: var(--warn);
+    font-size: 12px;
+    margin: 0 0 8px;
+}
+
+.refresh-failure:empty {
+    display: none;
+}
+
+.links {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin: 0;
+}
+
+/*
+ * Anything made clickable by ui/parts.ts `clickable`: a card's glyph, a row,
+ * a node on the map. They all take focus the same way.
+ */
+.pick {
+    cursor: pointer;
+}
+
+.pick:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+    border-radius: 6px;
+}
+
+g.pick:focus-visible {
+    outline: none;
+}
+
+g.pick:focus-visible .node,
+g.pick:focus-visible .entry-rect {
+    stroke: var(--accent);
+    stroke-width: 3;
+}
+
+.map {
+    margin: 0 auto;
+}

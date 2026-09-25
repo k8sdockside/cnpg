@@ -1,0 +1,13 @@
+# analytics: one instance and no backups at all.
+#
+# A perfectly working database that the Dashboard still flags: nothing
+# stands by if its only pod goes, and nothing could bring its data back.
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: analytics
+  namespace: cnpg-demo
+spec:
+  instances: 1
+  storage:
+    size: 1Gi

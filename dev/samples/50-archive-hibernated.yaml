@@ -1,0 +1,18 @@
+# archive: hibernated.
+#
+# `cnpg.io/hibernation: "on"` makes the operator delete every instance pod
+# and keep the PVCs, so the data is there and nothing runs. It is created
+# already hibernated; the operator first waits for it to be healthy, then
+# takes it down. Use "Wake up" in the plugin to bring it back (it sets the
+# annotation to "off"), and "Hibernate" to put it to sleep again.
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: archive
+  namespace: cnpg-demo
+  annotations:
+    cnpg.io/hibernation: 'on'
+spec:
+  instances: 1
+  storage:
+    size: 1Gi

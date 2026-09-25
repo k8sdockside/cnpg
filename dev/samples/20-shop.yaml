@@ -1,0 +1,94 @@
+# shop: the cluster the plugin is mostly about.
+#
+# Three instances with one synchronous standby, continuous WAL archiving and
+# base backups to the in-cluster object store, a nightly-ish ScheduledBackup
+# that also runs once as soon as it is created, a PgBouncer in front of the
+# primary (rw) and one in front of the standbys (ro), and a declarative
+# Database. On the Dashboard it is the healthy card with a recoverability
+# window that grows every ten minutes.
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: shop
+  namespace: cnpg-demo
+spec:
+  description: The shop's orders and customers
+  instances: 3
+  postgresql:
+    synchronous:
+      method: any
+      number: 1
+  storage:
+    size: 1Gi
+  walStorage:
+    size: 512Mi
+  backup:
+    retentionPolicy: 7d
+    barmanObjectStore:
+      destinationPath: s3://shop-backups/
+      endpointURL: http://backup-store.cnpg-demo.svc:9000
+      s3Credentials:
+        accessKeyId:
+          name: backup-store-creds
+          key: ACCESS_KEY_ID
+        secretAccessKey:
+          name: backup-store-creds
+          key: ACCESS_SECRET_KEY
+      wal:
+        compression: gzip
+      data:
+        compression: gzip
+---
+# The schedule has six fields, seconds first: CNPG's cron is robfig/cron with
+# seconds, not a Kubernetes CronJob's five. This is "every ten minutes".
+apiVersion: postgresql.cnpg.io/v1
+kind: ScheduledBackup
+metadata:
+  name: shop-every-10m
+  namespace: cnpg-demo
+spec:
+  schedule: '0 */10 * * * *'
+  immediate: true
+  backupOwnerReference: self
+  cluster:
+    name: shop
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: Pooler
+metadata:
+  name: shop-pooler-rw
+  namespace: cnpg-demo
+spec:
+  cluster:
+    name: shop
+  type: rw
+  instances: 2
+  pgbouncer:
+    poolMode: transaction
+    parameters:
+      max_client_conn: '200'
+      default_pool_size: '10'
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: Pooler
+metadata:
+  name: shop-pooler-ro
+  namespace: cnpg-demo
+spec:
+  cluster:
+    name: shop
+  type: ro
+  instances: 1
+  pgbouncer:
+    poolMode: session
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: Database
+metadata:
+  name: shop-reporting
+  namespace: cnpg-demo
+spec:
+  cluster:
+    name: shop
+  name: reporting
+  owner: app

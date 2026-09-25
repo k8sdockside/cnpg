@@ -1,0 +1,6 @@
+# Everything the samples create lives here, so `kubectl delete namespace
+# cnpg-demo` is a clean slate short of deleting the kind cluster.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: cnpg-demo

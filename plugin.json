@@ -1,0 +1,264 @@
+{
+    "$schema": "https://raw.githubusercontent.com/k8sdockside/k8sdockside/main/docs/plugin.schema.json",
+    "id": "cnpg",
+    "name": "CloudNativePG",
+    "version": "1.0.0",
+    "minAppVersion": "0.1.12",
+    "tagline": "PostgreSQL in Kubernetes: clusters, replication, backups and poolers",
+    "icon": "database",
+    "logo": "logo.svg",
+    "category": "storage",
+    "docs": "https://cloudnative-pg.io/documentation/current/",
+    "author": "K8s Dockside",
+    "authorUrl": "https://github.com/k8sdockside",
+    "links": [
+        { "label": "cloudnative-pg.io", "url": "https://cloudnative-pg.io" },
+        { "label": "Documentation", "url": "https://cloudnative-pg.io/documentation/current/" },
+        { "label": "API reference", "url": "https://cloudnative-pg.io/documentation/current/cloudnative-pg.v1/" },
+        { "label": "GitHub", "url": "https://github.com/cloudnative-pg/cloudnative-pg" },
+        { "label": "Plugin source", "url": "https://github.com/k8sdockside/cnpg" }
+    ],
+    "description": "CloudNativePG runs PostgreSQL in Kubernetes: one primary that takes the writes, standbys streaming from it, failover when the primary goes, PgBouncer poolers in front, and backups to an object store, to volume snapshots or through a plugin.\n\nThe Dashboard answers what you open Postgres for — is every cluster up, is every standby keeping up, and could each one be restored — with one card per cluster: its state in words, its shape as a small picture, how old its last backup is against its own schedule, and how far back a restore can reach. Everything that needs a person is listed under it, worst first. Topology draws one cluster whole: the primary in the middle, the standbys around it with the node and zone each runs on, and the poolers and services applications connect through. Backups puts every cluster's backups on a timeline, with its schedules in words and every failure's error written out in full.\n\nClusters, their pods and their volumes each get a panel of their own. The changes it can ask for — a backup now, hibernating a cluster or waking it up, and a rolling restart — are each shown to you before they are made.",
+
+    "requires": [
+        { "kind": "crd:clusters.postgresql.cnpg.io", "label": "Clusters" },
+        { "kind": "crd:backups.postgresql.cnpg.io", "label": "Backups", "optional": true },
+        { "kind": "crd:scheduledbackups.postgresql.cnpg.io", "label": "Scheduled backups", "optional": true },
+        { "kind": "crd:poolers.postgresql.cnpg.io", "label": "Poolers", "optional": true },
+        { "kind": "crd:databases.postgresql.cnpg.io", "label": "Databases", "optional": true },
+        { "kind": "crd:publications.postgresql.cnpg.io", "label": "Publications", "optional": true },
+        { "kind": "crd:subscriptions.postgresql.cnpg.io", "label": "Subscriptions", "optional": true },
+        { "kind": "crd:imagecatalogs.postgresql.cnpg.io", "label": "Image catalogs", "optional": true },
+        { "kind": "crd:clusterimagecatalogs.postgresql.cnpg.io", "label": "Cluster image catalogs", "optional": true }
+    ],
+
+    "overview": { "entry": "overview.html" },
+
+    "views": [
+        {
+            "id": "topology",
+            "label": "Topology",
+            "icon": "share",
+            "type": "custom",
+            "entry": "topology.html",
+            "focus": { "kind": "crd:clusters.postgresql.cnpg.io" }
+        },
+        { "id": "backups", "label": "Backups", "icon": "history", "type": "custom", "entry": "backups.html" },
+
+        { "id": "clusters", "label": "Clusters", "icon": "database", "kind": "crd:clusters.postgresql.cnpg.io" },
+        { "id": "backup-objects", "label": "Backup objects", "icon": "save", "kind": "crd:backups.postgresql.cnpg.io" },
+        { "id": "scheduled-backups", "label": "Scheduled backups", "icon": "clock", "kind": "crd:scheduledbackups.postgresql.cnpg.io" },
+        { "id": "poolers", "label": "Poolers", "icon": "gateway", "kind": "crd:poolers.postgresql.cnpg.io" },
+        { "id": "databases", "label": "Databases", "icon": "database", "kind": "crd:databases.postgresql.cnpg.io" },
+        { "id": "publications", "label": "Publications", "icon": "forward", "kind": "crd:publications.postgresql.cnpg.io" },
+        { "id": "subscriptions", "label": "Subscriptions", "icon": "download", "kind": "crd:subscriptions.postgresql.cnpg.io" },
+        { "id": "image-catalogs", "label": "Image catalogs", "icon": "layers", "kind": "crd:imagecatalogs.postgresql.cnpg.io" },
+        { "id": "cluster-image-catalogs", "label": "Cluster image catalogs", "icon": "layers", "kind": "crd:clusterimagecatalogs.postgresql.cnpg.io" },
+
+        { "id": "instances", "label": "Instance pods", "icon": "server", "kind": "pods", "selector": "cnpg.io/podRole=instance" },
+        { "id": "pooler-pods", "label": "Pooler pods", "icon": "gateway", "kind": "pods", "selector": "cnpg.io/podRole=pooler" },
+        { "id": "volumes", "label": "Volumes", "icon": "drive", "kind": "persistentvolumeclaims", "selector": "cnpg.io/cluster" },
+        { "id": "operator", "label": "Operator", "icon": "rocket", "kind": "pods", "selector": "app.kubernetes.io/name=cloudnative-pg" }
+    ],
+
+    "cards": [
+        {
+            "label": "Clusters",
+            "kind": "crd:clusters.postgresql.cnpg.io",
+            "groupBy": "status.phase",
+            "tones": {
+                "Cluster in healthy state": "ok",
+                "Switchover in progress": "warn",
+                "Failing over": "error",
+                "Setting up primary": "info",
+                "Creating a new replica": "info",
+                "Upgrading cluster": "info",
+                "Upgrading Postgres major version": "info",
+                "Cluster upgrade delayed": "warn",
+                "Waiting for user action": "warn",
+                "Waiting for the instances to become active": "warn",
+                "Applying configuration": "info",
+                "Online upgrade in progress": "info",
+                "Cluster is unrecoverable and needs manual intervention": "error",
+                "Unable to create required cluster objects": "error",
+                "Invalid cluster definition": "error",
+                "Cluster has incomplete or invalid image catalog": "error"
+            }
+        },
+        {
+            "label": "Cluster readiness",
+            "kind": "crd:clusters.postgresql.cnpg.io",
+            "groupBy": "status.conditions[Ready]",
+            "tones": { "True": "ok", "False": "error", "Unknown": "warn" }
+        },
+        {
+            "label": "WAL archiving",
+            "kind": "crd:clusters.postgresql.cnpg.io",
+            "groupBy": "status.conditions[ContinuousArchiving]",
+            "tones": { "True": "ok", "False": "error" }
+        },
+        {
+            "label": "Backups",
+            "kind": "crd:backups.postgresql.cnpg.io",
+            "groupBy": "status.phase",
+            "tones": {
+                "completed": "ok",
+                "failed": "error",
+                "walArchivingFailing": "error",
+                "invalid backup definition": "error",
+                "running": "info",
+                "started": "info",
+                "finalizing": "info",
+                "pending": "info"
+            }
+        },
+        { "label": "Scheduled backups", "kind": "crd:scheduledbackups.postgresql.cnpg.io" },
+        {
+            "label": "Poolers",
+            "kind": "crd:poolers.postgresql.cnpg.io",
+            "groupBy": "status.phase",
+            "tones": { "active": "ok", "paused": "warn", "inactive": "error", "failed": "error" }
+        },
+        { "label": "Databases", "kind": "crd:databases.postgresql.cnpg.io" }
+    ],
+
+    "charts": [
+        {
+            "id": "replication-lag",
+            "label": "Replication lag",
+            "attach": "overview",
+            "unit": "seconds",
+            "description": "How far each standby is behind its primary, from the exporter's cnpg_pg_replication_lag. It is 0 on a primary and on a standby that has replayed everything it received. The Topology view puts the latest value on each standby's link.",
+            "query": "max by (namespace, pod) (cnpg_pg_replication_lag)"
+        },
+        {
+            "id": "instances-up",
+            "label": "Instances up",
+            "attach": "overview",
+            "unit": "count",
+            "description": "Postgres instances answering the exporter, per cluster (cnpg_collector_up).",
+            "query": "sum by (namespace, cluster) (cnpg_collector_up)"
+        },
+        {
+            "id": "connections",
+            "label": "Connections",
+            "attach": "overview",
+            "unit": "count",
+            "description": "Client backends on each instance, in every state (cnpg_backends_total).",
+            "query": "sum by (namespace, pod) (cnpg_backends_total)"
+        },
+        {
+            "id": "transactions",
+            "label": "Commits",
+            "attach": "overview",
+            "unit": "ops/s",
+            "description": "Transactions committed per second on each instance, over five minutes (cnpg_pg_stat_database_xact_commit).",
+            "query": "sum by (namespace, pod) (rate(cnpg_pg_stat_database_xact_commit[5m]))"
+        },
+        {
+            "id": "database-size",
+            "label": "Database size",
+            "attach": "overview",
+            "unit": "bytes",
+            "description": "Every database on each instance added up (cnpg_pg_database_size_bytes). Standbys hold the same data as their primary.",
+            "query": "sum by (namespace, pod) (cnpg_pg_database_size_bytes)"
+        },
+        {
+            "id": "archive-failures",
+            "label": "WAL archive failures",
+            "attach": "overview",
+            "unit": "count",
+            "description": "Failed attempts to archive a WAL segment in the last fifteen minutes (cnpg_pg_stat_archiver_failed_count). Anything but zero means changes are not reaching the backups.",
+            "query": "sum by (namespace, pod) (increase(cnpg_pg_stat_archiver_failed_count[15m]))"
+        },
+        {
+            "id": "cluster-lag",
+            "label": "Replication lag",
+            "attach": "crd:clusters.postgresql.cnpg.io",
+            "unit": "seconds",
+            "legend": "pod",
+            "description": "How far each of this cluster's standbys is behind the primary (cnpg_pg_replication_lag).",
+            "query": "max by (pod) (cnpg_pg_replication_lag{namespace=\"$namespace\", pod=~\"$name-[0-9]+\"})"
+        },
+        {
+            "id": "cluster-connections",
+            "label": "Connections",
+            "attach": "crd:clusters.postgresql.cnpg.io",
+            "unit": "count",
+            "legend": "pod",
+            "description": "Client backends on each of this cluster's instances (cnpg_backends_total).",
+            "query": "sum by (pod) (cnpg_backends_total{namespace=\"$namespace\", pod=~\"$name-[0-9]+\"})"
+        }
+    ],
+
+    "sections": [
+        { "id": "cluster-glance", "label": "Postgres at a glance", "kind": "crd:clusters.postgresql.cnpg.io", "entry": "cluster.html", "height": 300 },
+        { "id": "pod-role", "label": "CloudNativePG", "kind": "pods", "entry": "pod.html", "height": 110 },
+        { "id": "pvc-role", "label": "CloudNativePG volume", "kind": "persistentvolumeclaims", "entry": "pvc.html", "height": 110 }
+    ],
+
+    "actions": [
+        {
+            "id": "backup-now",
+            "label": "Back up now",
+            "icon": "save",
+            "kind": "crd:clusters.postgresql.cnpg.io",
+            "confirm": "Take a backup of {name} now? CloudNativePG creates a Backup object and copies a base backup of the database to the cluster's object store. The database stays online and keeps taking writes while it runs.",
+            "done": "a backup of {name} has been asked for",
+            "when": [{ "field": "spec.backup.barmanObjectStore.destinationPath" }],
+            "request": {
+                "type": "create",
+                "kind": "crd:backups.postgresql.cnpg.io",
+                "object": {
+                    "apiVersion": "postgresql.cnpg.io/v1",
+                    "kind": "Backup",
+                    "metadata": { "generateName": "{name}-manual-" },
+                    "spec": { "cluster": { "name": "{name}" }, "method": "barmanObjectStore" }
+                }
+            }
+        },
+        {
+            "id": "backup-now-snapshot",
+            "label": "Snapshot now",
+            "icon": "save",
+            "kind": "crd:clusters.postgresql.cnpg.io",
+            "confirm": "Take a volume snapshot backup of {name} now? CloudNativePG creates a Backup object and snapshots the volumes of one instance — a standby when there is one — through the cluster's VolumeSnapshotClass. By default the snapshot is taken online and the database keeps running.",
+            "done": "a snapshot backup of {name} has been asked for",
+            "when": [{ "field": "spec.backup.volumeSnapshot.className" }],
+            "request": {
+                "type": "create",
+                "kind": "crd:backups.postgresql.cnpg.io",
+                "object": {
+                    "apiVersion": "postgresql.cnpg.io/v1",
+                    "kind": "Backup",
+                    "metadata": { "generateName": "{name}-snapshot-" },
+                    "spec": { "cluster": { "name": "{name}" }, "method": "volumeSnapshot" }
+                }
+            }
+        },
+        {
+            "id": "hibernate",
+            "label": "Hibernate",
+            "icon": "moon",
+            "tone": "danger",
+            "kind": "crd:clusters.postgresql.cnpg.io",
+            "confirm": "Hibernate {name}? CloudNativePG stops every Postgres pod of the cluster and keeps their volumes: the data stays, nothing runs, and applications cannot connect until you wake it up. It sets the annotation cnpg.io/hibernation to \"on\"; a cluster already hibernated is left as it is.",
+            "done": "{name} is going into hibernation",
+            "request": { "type": "patch", "patch": { "metadata": { "annotations": { "cnpg.io/hibernation": "on" } } } }
+        },
+        {
+            "id": "wake-up",
+            "label": "Wake up",
+            "icon": "sun",
+            "kind": "crd:clusters.postgresql.cnpg.io",
+            "confirm": "Wake {name} up? CloudNativePG starts its Postgres pods again on the volumes it kept. It sets the annotation cnpg.io/hibernation to \"off\"; a cluster that is not hibernated is left as it is.",
+            "done": "{name} is waking up",
+            "request": { "type": "patch", "patch": { "metadata": { "annotations": { "cnpg.io/hibernation": "off" } } } }
+        }
+    ],
+
+    "ui": {
+        "kinds": ["pods", "persistentvolumeclaims", "services", "nodes"],
+        "write": true
+    }
+}

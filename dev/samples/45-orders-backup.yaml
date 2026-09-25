@@ -1,0 +1,14 @@
+# The backup of orders that fails.
+#
+# Applied only once the orders cluster is Ready, so that it fails for the
+# reason it is meant to -- the object store refusing the credentials -- and
+# not because there was no primary to take it from yet.
+apiVersion: postgresql.cnpg.io/v1
+kind: Backup
+metadata:
+  name: orders-before-migration
+  namespace: cnpg-demo
+spec:
+  method: barmanObjectStore
+  cluster:
+    name: orders
