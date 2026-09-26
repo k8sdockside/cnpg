@@ -21,7 +21,7 @@
 // Timestamps are relative to when the module is loaded, so ages read the
 // same whenever the preview is drawn.
 //
-// It lives in src/ rather than src/pages/ because scripts/build.mjs turns
+// It lives in src/ rather than src/pages/ because k8sdockside-plugin build turns
 // every non-test .ts under src/pages into a page of its own.
 
 const NOW = Date.now();
